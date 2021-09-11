@@ -1,0 +1,31 @@
+version: '3'
+services:
+  cicloguia-api:
+    build:
+      context: service
+    container_name: cicloguia.api
+    image: cicloguia_api:latest
+    restart: on-failure
+    command: uvicorn cicloguia.src.entrypoints.main:app --reload --host 0.0.0.0
+    depends_on:
+      - dynamodb
+      - s3
+    volumes:
+      - ./service/cicloguia:/home/services/cicloguia
+    ports:
+      - '80:8000'
+
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: cicloguia.dynamodb
+    volumes:
+      - ./dynamodb_data:/home/dynamodblocal/data
+    ports:
+      - '6000:8000'
+  s3:
+    image: localstack/localstack
+    container_name: cicloguia.s3
+    environment:
+      SERVICES: s3
+    ports:
+      - '4000:4566'
