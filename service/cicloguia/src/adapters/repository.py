@@ -1,8 +1,7 @@
 import logging
-from typing import Dict
+from typing import Dict, Optional
 
 from botocore.exceptions import ClientError
-
 from cicloguia.src import config
 from cicloguia.src.domain.model import Product
 
@@ -18,7 +17,7 @@ class DynamoRepository:
     def add(self, item: Product) -> Dict:
         return self.table.put_item(Item=item.__dict__)
 
-    def get(self, url: str) -> Product:
+    def get(self, url: str) -> Optional[Product]:
         try:
             response = self.table.get_item(Key={'url': url})
         except ClientError as error:
@@ -26,8 +25,8 @@ class DynamoRepository:
         else:
             try:
                 return Product(**response['Item'])
-            except (TypeError, KeyError) as error:
-                logging.error(str(error))
+            except KeyError:
+                return None
 
     def update(self, item: Product) -> Dict:
         return self.add(item=item)

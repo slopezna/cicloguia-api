@@ -6,3 +6,4 @@ venv
 *.egg-info/
 *.egg/
 /dynamodb_data/
+/service/cicloguia/tests/.pytest_cache/

@@ -1,13 +1,11 @@
-from typing import List, Optional
+from cicloguia.src.domain import model
 
-from pydantic import BaseModel
-
-
+"""
 class Product(BaseModel):
     url: str
     product_name: str
-    brand: str
     category: str
+    brand: str
     sku: Optional[int]
     price: Optional[str]
     description: Optional[str]
@@ -16,3 +14,9 @@ class Product(BaseModel):
     sizes: Optional[List[str]]
     unavailable_sizes: Optional[List[str]]
     image_urls: Optional[List[str]]
+"""
+
+
+def test_model_instance(random_product: model.Product) -> None:
+    assert isinstance(random_product, model.Product)
+    assert not random_product.image_urls
