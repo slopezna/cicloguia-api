@@ -16,3 +16,6 @@ class Product(BaseModel):
     sizes: Optional[List[str]]
     unavailable_sizes: Optional[List[str]]
     image_urls: Optional[List[str]]
+
+    def __repr__(self) -> str:
+        return f'<Product: {self.url}>'

@@ -1,8 +1,11 @@
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
+# noinspection PyPackageRequirements
 from botocore.exceptions import ClientError
+# noinspection PyPackageRequirements
 from botocore.response import StreamingBody
+
 from cicloguia.src import config
 from cicloguia.src.domain.model import Product
 
@@ -18,9 +21,10 @@ class DynamoRepository:
     def add(self, item: Product) -> Dict:
         return self.table.put_item(Item=item.__dict__)
 
-    # todo: implement this feature
-    def bulk_insert(self):
-        pass
+    def batch_insert(self, items: List[Dict]) -> None:
+        with self.table.batch_writer() as batch:
+            for item in items:
+                batch.put_item(Item=item.__dict__)
 
     def get(self, url: str) -> Optional[Product]:
         try:

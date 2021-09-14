@@ -4,3 +4,4 @@ icecream==2.1.1
 pytest==6.2.5
 uvicorn[standard]
 boto3
+faker

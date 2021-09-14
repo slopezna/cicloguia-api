@@ -17,6 +17,6 @@ class Product(BaseModel):
 """
 
 
-def test_model_instance(random_product: model.Product) -> None:
+def test_model_instance(random_product: model.Product):
     assert isinstance(random_product, model.Product)
-    assert not random_product.image_urls
+    assert random_product.image_urls is None
