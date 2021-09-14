@@ -1,13 +1,13 @@
+from typing import Dict
 from typing import List
+from uuid import uuid4
 
 import boto3
 import pytest
+
 from cicloguia.src import config
 from cicloguia.src.adapters import repository
 from cicloguia.src.domain import model
-
-from uuid import uuid4
-from typing import Dict
 
 
 def random_id() -> str:

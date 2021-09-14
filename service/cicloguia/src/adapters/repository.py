@@ -21,7 +21,7 @@ class DynamoRepository:
     def add(self, item: Product) -> Dict:
         return self.table.put_item(Item=item.__dict__)
 
-    def batch_insert(self, items: List[Dict]) -> None:
+    def batch_insert(self, items: List[Product]) -> None:
         with self.table.batch_writer() as batch:
             for item in items:
                 batch.put_item(Item=item.__dict__)

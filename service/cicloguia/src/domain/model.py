@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -7,15 +7,15 @@ class Product(BaseModel):
     url: str
     product_name: str
     brand: str
-    category: str
-    sku: Optional[int]
-    price: Optional[str]
+    category: Optional[str]
+    sku: Union[int, str, None]
+    price: Union[int, str, float, None]
     description: Optional[str]
     specifications: Optional[str]  # technical specifications
-    alert: Optional[str]  # could be either oos or pre-sale
-    sizes: Optional[List[str]]
-    unavailable_sizes: Optional[List[str]]
-    image_urls: Optional[List[str]]
+    alert: Union[List, str, None]  # could be either oos or pre-sale
+    sizes: Union[List[str], str, None]
+    unavailable_sizes: Union[List, str, None]
+    image_urls: Union[List, str, None]
 
     def __repr__(self) -> str:
         return f'<Product: {self.url}>'
