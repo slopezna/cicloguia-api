@@ -39,7 +39,9 @@ def upload_products() -> None:
     products_repo = repository.DynamoRepository(session=dynamodb_session)
     products_repo.create_table()
 
-    data_paths = ['../assets/crossmountain-items.json', '../assets/ridecl-items.json']
+    # the crossmountain-items.json lacks categories, breaking the execution since it is a secondary index
+    # data_paths = ['../assets/crossmountain-items.json', '../assets/ridecl-items.json']
+    data_paths = ['../assets/ridecl-items.json']
     products_data = []
     for path in data_paths:
         for line in open(path, 'r'):

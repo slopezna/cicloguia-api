@@ -8,8 +8,10 @@ from botocore.response import StreamingBody
 
 from cicloguia.src import config
 from cicloguia.src.domain.model import Product
+from boto3.dynamodb.conditions import Key, Attr
 
 
+# todo: create a pagination function
 class DynamoRepository:
     def __init__(self, session, table_name: str = config.get_dynamo_table_name()):
         self.session = session
@@ -26,7 +28,7 @@ class DynamoRepository:
             for item in items:
                 batch.put_item(Item=item.__dict__)
 
-    def get(self, url: str) -> Optional[Product]:
+    def get_by_url(self, url: str) -> Optional[Product]:
         try:
             response = self.table.get_item(Key={'url': url})
         except ClientError as error:
@@ -36,6 +38,9 @@ class DynamoRepository:
                 return Product(**response['Item'])
             except KeyError:
                 return None
+
+    def get_by_category(self, category: str):
+        return self.table.query(IndexName='category', KeyConditionExpression=Key('category').eq(category))
 
     def update(self, item: Product) -> Dict:
         return self.add(item=item)
@@ -55,6 +60,28 @@ class DynamoRepository:
                         'AttributeName': 'url',
                         'AttributeType': 'S'
                     },
+                    {
+                        'AttributeName': 'category',
+                        'AttributeType': 'S'
+                    },
+                ],
+                GlobalSecondaryIndexes=[
+                    {
+                        'IndexName': 'category',
+                        'KeySchema': [
+                            {
+                                'AttributeName': 'category',
+                                'KeyType': 'HASH'
+                            },
+                        ],
+                        'Projection': {
+                            'ProjectionType': 'ALL'
+                        },
+                        'ProvisionedThroughput': {
+                            'ReadCapacityUnits': 1,
+                            'WriteCapacityUnits': 1,
+                        }
+                    }
                 ],
                 ProvisionedThroughput={
                     'ReadCapacityUnits': self.read_capacity_units,
