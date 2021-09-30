@@ -31,3 +31,4 @@ sales.
 1. Install the python package locally: `cd service && pip install -e cicloguia`
 2. Build the stack: `docker-compose build`
 3. Launch the stack: `docker-compose up -d`
+4. Upload the sample products: `python service/src/entrypoint/uploader.py`

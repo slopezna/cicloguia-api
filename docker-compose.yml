@@ -6,7 +6,7 @@ services:
     container_name: cicloguia.api
     image: cicloguia_api:latest
     restart: on-failure
-    command: uvicorn cicloguia.src.entrypoints.main:app --reload --host 0.0.0.0
+    command: uvicorn cicloguia.src.entrypoint.main:app --reload --host 0.0.0.0
     depends_on:
       - dynamodb
       - s3

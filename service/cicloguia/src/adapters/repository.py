@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, Optional, List
 
+from boto3.dynamodb.conditions import Key
 # noinspection PyPackageRequirements
 from botocore.exceptions import ClientError
 # noinspection PyPackageRequirements
@@ -8,7 +9,6 @@ from botocore.response import StreamingBody
 
 from cicloguia.src import config
 from cicloguia.src.domain.model import Product
-from boto3.dynamodb.conditions import Key, Attr
 
 
 # todo: create a pagination function
@@ -19,6 +19,7 @@ class DynamoRepository:
         self.table = self.session.Table(self.table_name)
         self.read_capacity_units = 10
         self.write_capacity_units = 10
+        self.paginator_limit = 5
 
     def add(self, item: Product) -> Dict:
         return self.table.put_item(Item=item.__dict__)
@@ -40,7 +41,11 @@ class DynamoRepository:
                 return None
 
     def get_by_category(self, category: str):
-        return self.table.query(IndexName='category', KeyConditionExpression=Key('category').eq(category))
+        return self.table.query(
+            IndexName='category',
+            Limit=self.paginator_limit,
+            KeyConditionExpression=Key('category').eq(category)
+        )
 
     def update(self, item: Product) -> Dict:
         return self.add(item=item)
