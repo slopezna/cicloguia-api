@@ -1,13 +1,14 @@
 from typing import Dict
-from cicloguia.src.adapters import repository
+
+from src.adapters import repository
 
 
 # todo: implement the functions
-def get_product_details(products_repo: repository.DynamoRepository) -> Dict:
+def get_product_details() -> Dict:
     pass
 
 
-def get_products_from_category(products_repo: repository.DynamoRepository) -> Dict:
+def get_products_from_category(database) -> Dict:
     pass
 
 

@@ -3,12 +3,12 @@ import os
 from typing import List, Dict
 
 import boto3
+from icecream import ic
+from pydantic import ValidationError
 
 from cicloguia.src import config
 from cicloguia.src.adapters import repository
 from cicloguia.src.domain import model
-from icecream import ic
-from pydantic import ValidationError
 
 
 def upload_images() -> None:
@@ -35,10 +35,6 @@ def upload_images() -> None:
 
 
 def upload_products() -> None:
-    dynamodb_session = boto3.resource('dynamodb', **config.get_dynamo_parameters(test=True))
-    products_repo = repository.DynamoRepository(session=dynamodb_session)
-    products_repo.create_table()
-
     # the crossmountain-items.json lacks categories, breaking the execution since it is a secondary index
     # data_paths = ['../assets/crossmountain-items.json', '../assets/ridecl-items.json']
     data_paths = ['../assets/ridecl-items.json']
@@ -65,9 +61,6 @@ def upload_products() -> None:
             except ValidationError as error:
                 ic(str(error))
                 ic(raw_data)
-
-    products_repo.batch_insert(items=products_data)
-    # ic(products_data[0])
 
 
 if __name__ == '__main__':

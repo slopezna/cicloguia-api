@@ -1,102 +1,12 @@
 import logging
-from typing import Dict, Optional, List
+from typing import Dict, Optional
 
-from boto3.dynamodb.conditions import Key
 # noinspection PyPackageRequirements
 from botocore.exceptions import ClientError
 # noinspection PyPackageRequirements
 from botocore.response import StreamingBody
 
 from cicloguia.src import config
-from cicloguia.src.domain.model import Product
-
-
-# todo: create a pagination function
-class DynamoRepository:
-    def __init__(self, session, table_name: str = config.get_dynamo_table_name()):
-        self.session = session
-        self.table_name = table_name
-        self.table = self.session.Table(self.table_name)
-        self.read_capacity_units = 10
-        self.write_capacity_units = 10
-        self.paginator_limit = 5
-
-    def add(self, item: Product) -> Dict:
-        return self.table.put_item(Item=item.__dict__)
-
-    def batch_insert(self, items: List[Product]) -> None:
-        with self.table.batch_writer() as batch:
-            for item in items:
-                batch.put_item(Item=item.__dict__)
-
-    def get_by_url(self, url: str) -> Optional[Product]:
-        try:
-            response = self.table.get_item(Key={'url': url})
-        except ClientError as error:
-            logging.error(error.response['Error']['Message'])
-        else:
-            try:
-                return Product(**response['Item'])
-            except KeyError:
-                return None
-
-    def get_by_category(self, category: str):
-        return self.table.query(
-            IndexName='category',
-            Limit=self.paginator_limit,
-            KeyConditionExpression=Key('category').eq(category)
-        )
-
-    def update(self, item: Product) -> Dict:
-        return self.add(item=item)
-
-    def create_table(self) -> Dict:
-        try:
-            table = self.session.create_table(
-                TableName=self.table_name,
-                KeySchema=[
-                    {
-                        'AttributeName': 'url',
-                        'KeyType': 'HASH'  # Partition key
-                    },
-                ],
-                AttributeDefinitions=[
-                    {
-                        'AttributeName': 'url',
-                        'AttributeType': 'S'
-                    },
-                    {
-                        'AttributeName': 'category',
-                        'AttributeType': 'S'
-                    },
-                ],
-                GlobalSecondaryIndexes=[
-                    {
-                        'IndexName': 'category',
-                        'KeySchema': [
-                            {
-                                'AttributeName': 'category',
-                                'KeyType': 'HASH'
-                            },
-                        ],
-                        'Projection': {
-                            'ProjectionType': 'ALL'
-                        },
-                        'ProvisionedThroughput': {
-                            'ReadCapacityUnits': 1,
-                            'WriteCapacityUnits': 1,
-                        }
-                    }
-                ],
-                ProvisionedThroughput={
-                    'ReadCapacityUnits': self.read_capacity_units,
-                    'WriteCapacityUnits': self.write_capacity_units
-                }
-            )
-            return table
-
-        except ClientError:
-            logging.info('the DynamoDB table was already created!')
 
 
 class S3Repository:
