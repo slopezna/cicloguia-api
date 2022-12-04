@@ -10,6 +10,7 @@ if __name__ == '__main__':
         db = firestore.Client()
     else:
         # localhost
+        # noinspection DuplicatedCode
         os.environ['FIRESTORE_DATASET'] = 'test'
         os.environ['FIRESTORE_EMULATOR_HOST'] = 'localhost:8001'
         os.environ['FIRESTORE_EMULATOR_HOST_PATH'] = 'localhost:8001/firestore'
@@ -17,12 +18,16 @@ if __name__ == '__main__':
         os.environ['FIRESTORE_PROJECT_ID'] = 'test'
 
         credentials = mock.Mock(spec=google.auth.credentials.Credentials)
+        # noinspection PyTypeChecker
         db = firestore.Client(project='test', credentials=credentials)
 
-    doc_ref = db.collection('products').document('tiendaride.cl/product/bicicleta-polygon-xtrada-5-2021')
+    batch = db.batch()
 
-    doc = doc_ref.get()
-    if doc.exists:
-        print(f'Document data: {doc.to_dict()}')
-    else:
-        print(u'No such document!')
+    data = {
+        u'name': u'Los Angeles',
+        u'state': u'CA',
+        u'country': u'USA'
+    }
+    nyc_ref = db.collection(u'cities').document(u'NYC')
+    batch.set(nyc_ref, data)
+    batch.commit()

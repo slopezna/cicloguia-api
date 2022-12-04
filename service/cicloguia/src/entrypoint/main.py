@@ -4,6 +4,7 @@ import google.auth.credentials
 import mock
 from fastapi import FastAPI
 from google.cloud import firestore
+from icecream import ic
 
 app = FastAPI()
 
@@ -27,12 +28,18 @@ else:
 
 @app.get("/")
 def read_root():
-    return 200
+    record = db.collection('products').document('tiendaride.cl/product/bicicleta-polygon-xtrada-5-2021').get()
+    return record.to_dict(), 200
 
 
-@app.get("/items/{category}")
-def read_item(category: str):
-    return {"item_id": category}
+@app.get("/items")
+def read_item():
+    docs = db.collection('products').stream()
+
+    for doc in docs:
+        ic(f'{doc.id} => {doc.to_dict()}')
+
+    return 'ok', 200
 
 
 @app.get("/images/{name}")

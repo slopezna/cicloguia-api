@@ -3,8 +3,11 @@ import os
 from typing import List, Dict
 
 import boto3
+import google.auth.credentials
+import mock
+from google.api_core.exceptions import InvalidArgument
+from google.cloud import firestore
 from icecream import ic
-from pydantic import ValidationError
 
 from cicloguia.src import config
 from cicloguia.src.adapters import repository
@@ -35,10 +38,28 @@ def upload_images() -> None:
 
 
 def upload_products() -> None:
+    if os.getenv('GAE_ENV', '').startswith('standard'):
+        # production
+        db = firestore.Client()
+    else:
+        # localhost
+        # noinspection DuplicatedCode
+        os.environ['FIRESTORE_DATASET'] = 'test'
+        os.environ['FIRESTORE_EMULATOR_HOST'] = 'localhost:8001'
+        os.environ['FIRESTORE_EMULATOR_HOST_PATH'] = 'localhost:8001/firestore'
+        os.environ['FIRESTORE_HOST'] = 'http://localhost:8001'
+        os.environ['FIRESTORE_PROJECT_ID'] = 'test'
+
+        credentials = mock.Mock(spec=google.auth.credentials.Credentials)
+        # noinspection PyTypeChecker
+        db = firestore.Client(project='test', credentials=credentials)
+
+    batch = db.batch()
+
     # the crossmountain-items.json lacks categories, breaking the execution since it is a secondary index
     # data_paths = ['../assets/crossmountain-items.json', '../assets/ridecl-items.json']
     data_paths = ['../assets/ridecl-items.json']
-    products_data = []
+
     for path in data_paths:
         for line in open(path, 'r'):
             # todo: create a cleaning function with regex instead of ifs
@@ -57,10 +78,13 @@ def upload_products() -> None:
                             raw_data[key] = item[0]
 
                 product = model.Product(**raw_data)
-                products_data.append(product)
-            except ValidationError as error:
+                nyc_ref = db.collection('products').document(product.url.replace('https://', ''))
+                batch.set(nyc_ref, product._asdict())
+            except InvalidArgument as error:
                 ic(str(error))
                 ic(raw_data)
+
+    batch.commit()
 
 
 if __name__ == '__main__':

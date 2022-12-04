@@ -4,9 +4,10 @@ from icecream import ic
 
 fields = (
     'url',
-    'product_name',
+    'scraping_date',
+    'product_name',  # todo: rename to name within the web scraper
     'brand',
-    'category',
+    'categories',
     'sku',
     'price',
     'description',
@@ -15,6 +16,7 @@ fields = (
     'sizes',
     'unavailable_sizes',
     'image_urls',
+    'images',
 )
 Product = namedtuple('Product', fields)
 
